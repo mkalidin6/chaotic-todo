@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Chaotic To-Do List v2</title>
+<style>
+body {
+    background: linear-gradient(120deg, #ff00ff, #00ffff);
+    font-family: Comic Sans MS, sans-serif;
+    color: #ffffff;
+    text-align: center;
+    overflow: auto;
+    animation: flashBg 3s infinite alternate;
+}
+@keyframes flashBg {
+    0% { background: #ff00ff; }
+    50% { background: #00ffff; }
+    100% { background: #ffff00; }
+}
+
+h1 { font-size: 3em; margin-top: 20px; text-shadow: 3px 3px #000; }
+
+input, button { font-size: 0.8em; padding: 5px; margin: 10px; }
+#taskInput {
+    width: 250px; color: #0000ff; background-color: #ff00ff; border: 2px solid #00ff00;
+}
+#addBtn, #extraBtn {
+    background-color: #ff0000; color: #00ff00; border: 3px dashed #0000ff; cursor: pointer;
+}
+
+ul { list-style: none; padding: 0; }
+li {
+    background-color: #ffff00; color: #ff0000; margin: 10px; padding: 10px;
+    border: 2px dotted #ff00ff; width: 250px; display: inline-block;
+    animation: shake 1s infinite; position: absolute;
+}
+button.deleteBtn { margin-left: 10px; background-color: #000; color: #fff; border: none; cursor: pointer; }
+
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    50% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.fake-bar {
+    width: 0%; height: 10px; background: red; margin: 10px auto;
+    transition: width 1s ease;
+}
+</style>
+</head>
+<body>
+
+<h1>Ultimate Chaotic To-Do List v2</h1>
+<input type="text" id="taskInput" placeholder="Type your task here...">
+<button id="addBtn">Cancel Task</button> <!-- Misleading label -->
+<button id="extraBtn">Delete Everything</button> <!-- Misleading extra button -->
+<ul id="taskList"></ul>
+<div class="fake-bar" id="fakeBar"></div>
+<audio id="clickSound"><source src="https://www.soundjay.com/button/beep-07.wav" type="audio/wav"></audio>
+
+<script>
+const taskInput = document.getElementById('taskInput');
+const addBtn = document.getElementById('addBtn');
+const extraBtn = document.getElementById('extraBtn');
+const taskList = document.getElementById('taskList');
+const fakeBar = document.getElementById('fakeBar');
+const clickSound = document.getElementById('clickSound');
+
+/* Random position */
+function randomPosition(el) {
+    const x = Math.random() * (window.innerWidth - el.offsetWidth);
+    const y = Math.random() * (window.innerHeight - el.offsetHeight);
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+}
+
+/* Add task with extra confirmations */
+function addTask() {
+    const text = taskInput.value;
+    if (!text) { alert("Oops! You forgot to type something!"); return; }
+
+    if (!confirm("Are you sure?")) return;
+    if (!confirm("Really sure?")) return;
+
+    const li = document.createElement('li');
+    li.innerHTML = `<span>❌ ${text} ✅</span> <button class="deleteBtn">Add</button>`; // Misleading button
+
+    taskList.appendChild(li);
+    randomPosition(li);
+
+    // Shake & random color
+    setInterval(() => {
+        li.style.color = `#${Math.floor(Math.random()*16777215).toString(16)}`;
+    }, 2000);
+
+    li.querySelector('.deleteBtn').addEventListener('click', () => {
+        clickSound.play();
+        alert("Deleting... or not?");
+        if (confirm("Still delete?")) li.remove(); else alert("Task saved instead!");
+    });
+
+    taskInput.value = '';
+}
+
+/* Input typing delay */
+let typingTimeout;
+taskInput.addEventListener('input', (e) => {
+    const value = e.target.value;
+    taskInput.value = '';
+    clearTimeout(typingTimeout);
+    let index = 0;
+    function typeChar() {
+        if (index < value.length) {
+            taskInput.value += value[index];
+            index++;
+            typingTimeout = setTimeout(typeChar, 150); // slow typing
+        }
+    }
+    typeChar();
+});
+
+/* Buttons click */
+addBtn.addEventListener('click', addTask);
+extraBtn.addEventListener('click', () => {
+    clickSound.play();
+    alert("Are you sure you want to delete EVERYTHING?");
+    if (confirm("Really sure?")) taskList.innerHTML = ''; else alert("Saved your tasks!");
+});
+
+/* Chaotic movement */
+setInterval(() => {
+    const items = document.querySelectorAll('li');
+    items.forEach(randomPosition);
+
+    // Move buttons randomly
+    [addBtn, extraBtn].forEach(btn => {
+        const x = Math.random() * (window.innerWidth - btn.offsetWidth);
+        const y = Math.random() * (window.innerHeight - btn.offsetHeight);
+        btn.style.position = 'absolute';
+        btn.style.left = x + 'px';
+        btn.style.top = y + 'px';
+    });
+
+    // Randomly swap button functionalities
+    if (Math.random() < 0.3) {
+        [addBtn.textContent, extraBtn.textContent] = [extraBtn.textContent, addBtn.textContent];
+        [addBtn.onclick, extraBtn.onclick] = [extraBtn.onclick, addBtn.onclick];
+    }
+
+    // Random fake progress bar
+    fakeBar.style.width = Math.random() * 100 + '%';
+
+    // Random flashing alert
+    if (Math.random() < 0.1) alert("Random Alert! Chaos Incoming!");
+}, 3000);
+
+/* Enter key adds task */
+taskInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addTask();
+});
+</script>
+
+</body>
+</html>
