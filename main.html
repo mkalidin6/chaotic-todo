@@ -1,490 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>404: Design Not Found — Frustrating To‑Do</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    :root{
-      --bg1:#fffbea;
-      --bg2:#ffeef6;
-      --accent:#2b2bff;
-      --bad:#ff3b3b;
-      --muted:#222;
-    }
-    html,body{height:100%;margin:0;font-family:"Comic Sans MS", "Trebuchet MS", sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:var(--muted);display:flex;align-items:center;justify-content:center}
-    .stage{width:min(980px,95vw);background:rgba(255,255,255,0.96);border-radius:16px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,0.12);position:relative;overflow:hidden}
-    h1{margin:0 0 6px 0;font-size:1.9rem}
-    .subtitle{color:#666;margin-bottom:12px}
-    /* overlay */
-    .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:linear-gradient(180deg, rgba(0,0,0,0.03), rgba(255,255,255,0.8));backdrop-filter:blur(2px);padding:20px}
-    .big{font-size:1.8rem;font-weight:800;user-select:none}
-    .hint{font-size:.95rem;color:#444}
-    .clickbtn{background:linear-gradient(180deg,#ff7a7a,#ff3b8b);color:white;padding:12px 18px;border-radius:10px;border:0;cursor:pointer;font-weight:900;box-shadow:0 10px 20px rgba(255,59,139,0.08)}
-    .clickbtn.annoy{background:linear-gradient(180deg,#ffd27a,#ffb86b);color:#7a3a00}
-    /* toast */
-    .toast{position:fixed;left:50%;transform:translateX(-50%) translateY(30px);bottom:30px;background:#111;color:#fff;padding:10px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:all .28s ease}
-    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
-    /* to-do UI */
-    .todo{display:none;text-align:left}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-    .tab{padding:8px 12px;border-radius:10px;border:2px solid rgba(0,0,0,0.06);cursor:pointer;background:#fff;font-weight:800}
-    .tab.active{background:linear-gradient(180deg,#e6f0ff,#fff);border-color:var(--accent);color:var(--accent)}
-    .addRow{display:flex;gap:8px;margin:10px 0}
-    input[type="text"]{padding:10px;border-radius:8px;border:2px dashed #ddd;flex:1}
-    .tasks{margin-top:12px;display:flex;flex-direction:column;gap:10px}
-    .task{padding:10px 12px;border-radius:8px;background:linear-gradient(180deg,#fff,#fbfbfb);display:flex;align-items:center;gap:12px;border:1px solid #eee}
-    .task.done{opacity:0.5;text-decoration:line-through;color:#999}
-    .meta{margin-left:auto;font-size:.85rem;color:#666}
-    .sarcastic{font-style:italic;color:#a22;margin-top:8px}
-    /* grocery collapsed */
-    .groceryNotice{margin:10px 0;padding:10px;border-radius:10px;background:linear-gradient(180deg,#fff8e6,#fff);border:1px dashed #ffd27a;color:#7a3a00;display:flex;align-items:center;justify-content:space-between}
-    .viewListBtn{background:#fff;color:#7a3a00;padding:8px 12px;border-radius:8px;border:2px solid rgba(122,58,0,0.08);cursor:pointer;font-weight:800}
-    /* intentional chaos */
-    .misorder{display:flex;gap:8px;flex-wrap:wrap}
-    .floating{position:absolute;right:18px;top:18px;font-size:40px;cursor:grab;user-select:none;transition:transform .12s linear}
-    .bob{animation:bob 2s infinite}
-    @keyframes bob{0%{transform:translateY(0)}50%{transform:translateY(-8px)}100%{transform:translateY(0)}}
-    .moving{transition:left .3s ease, top .3s ease}
-    /* small */
-    @media (max-width:520px){.big{font-size:1.2rem}.stage{padding:14px}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Chaotic To-Do List v2</title>
+<style>
+body {
+    background: linear-gradient(120deg, #ff00ff, #00ffff);
+    font-family: Comic Sans MS, sans-serif;
+    color: #ffffff;
+    text-align: center;
+    overflow: auto;
+    animation: flashBg 3s infinite alternate;
+}
+@keyframes flashBg {
+    0% { background: #ff00ff; }
+    50% { background: #00ffff; }
+    100% { background: #ffff00; }
+}
+
+h1 { font-size: 3em; margin-top: 20px; text-shadow: 3px 3px #000; }
+
+input, button { font-size: 0.8em; padding: 5px; margin: 10px; }
+#taskInput {
+    width: 250px; color: #0000ff; background-color: #ff00ff; border: 2px solid #00ff00;
+}
+#addBtn, #extraBtn {
+    background-color: #ff0000; color: #00ff00; border: 3px dashed #0000ff; cursor: pointer;
+}
+
+ul { list-style: none; padding: 0; }
+li {
+    background-color: #ffff00; color: #ff0000; margin: 10px; padding: 10px;
+    border: 2px dotted #ff00ff; width: 250px; display: inline-block;
+    animation: shake 1s infinite; position: absolute;
+}
+button.deleteBtn { margin-left: 10px; background-color: #000; color: #fff; border: none; cursor: pointer; }
+
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    50% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.fake-bar {
+    width: 0%; height: 10px; background: red; margin: 10px auto;
+    transition: width 1s ease;
+}
+</style>
 </head>
 <body>
-  <div class="stage" id="stage">
-    <div class="floating bob" id="duck">🦆</div>
-    <h1 id="title">404: Design Not Found</h1>
-    <div class="subtitle">Make Bad UI/UX — welcome to the wrong kind of productivity.</div>
 
-    <!-- Overlay with scramble + click challenge -->
-    <div class="overlay" id="overlay" aria-hidden="false">
-      <div class="big" id="welcomeText">Welcome to the unexpected chaos</div>
-      <div class="hint" id="welcomeHint">(words will scramble in a few seconds)</div>
-      <button class="clickbtn" id="startClick">Click to proceed</button>
-      <div class="hint" id="clickHint">Keep clicking until the page responds — it might be slow, dramatic, or petty.</div>
-      <button class="clickbtn annoy" id="signupHint" title="Important?">Sign up (not necessary)</button>
-    </div>
+<h1>Ultimate Chaotic To-Do List v2</h1>
+<input type="text" id="taskInput" placeholder="Type your task here...">
+<button id="addBtn">Cancel Task</button> <!-- Misleading label -->
+<button id="extraBtn">Delete Everything</button> <!-- Misleading extra button -->
+<ul id="taskList"></ul>
+<div class="fake-bar" id="fakeBar"></div>
+<audio id="clickSound"><source src="https://www.soundjay.com/button/beep-07.wav" type="audio/wav"></audio>
 
-    <p style="opacity:.7;font-size:.95rem">Everything else is sleeping... wake it by poking the overlay or by being impatient.</p>
+<script>
+const taskInput = document.getElementById('taskInput');
+const addBtn = document.getElementById('addBtn');
+const extraBtn = document.getElementById('extraBtn');
+const taskList = document.getElementById('taskList');
+const fakeBar = document.getElementById('fakeBar');
+const clickSound = document.getElementById('clickSound');
 
-    <!-- To-do app -->
-    <div class="todo" id="todoApp" aria-hidden="true">
-      <h2 style="margin:8px 0 6px 0">To‑Do — Chaotic Edition</h2>
+/* Random position */
+function randomPosition(el) {
+    const x = Math.random() * (window.innerWidth - el.offsetWidth);
+    const y = Math.random() * (window.innerHeight - el.offsetHeight);
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+}
 
-      <!-- Tabs intentionally reorders randomly to frustrate -->
-      <div class="tabs misorder" id="tabs">
-        <div class="tab active" data-cat="study">Study Plan</div>
-        <div class="tab" data-cat="grocery">Grocery Shopping</div>
-        <div class="tab" data-cat="exercise">Exercise</div>
-        <div class="tab" data-cat="food">Food</div>
-      </div>
+/* Add task with extra confirmations */
+function addTask() {
+    const text = taskInput.value;
+    if (!text) { alert("Oops! You forgot to type something!"); return; }
 
-      <div class="addRow">
-        <input id="taskInput" type="text" placeholder="Add a new task (this might go to the wrong list)"/>
-        <button id="addTask" class="clickbtn" style="background:linear-gradient(180deg,#6f6fff,#3b3bff)">Add</button>
-        <button id="randomAdd" class="clickbtn annoy" style="background:linear-gradient(180deg,#ffd27a,#ffb86b)">Surprise Add</button>
-      </div>
+    if (!confirm("Are you sure?")) return;
+    if (!confirm("Really sure?")) return;
 
-      <div class="sarcastic" id="sarcastic">No tasks yet. I can't wait.</div>
+    const li = document.createElement('li');
+    li.innerHTML = `<span>❌ ${text} ✅</span> <button class="deleteBtn">Add</button>`; // Misleading button
 
-      <!-- grocery collapsed notice -->
-      <div class="groceryNotice" id="groceryNotice" style="display:none">
-        <div id="groceryHint">Click to view the list</div>
-        <button class="viewListBtn" id="viewGroceryBtn">View list →</button>
-      </div>
+    taskList.appendChild(li);
+    randomPosition(li);
 
-      <div class="tasks" id="tasks"></div>
+    // Shake & random color
+    setInterval(() => {
+        li.style.color = `#${Math.floor(Math.random()*16777215).toString(16)}`;
+    }, 2000);
 
-      <!-- intentionally confusing sign-up / reset modal (hidden) -->
-      <div id="annoyForm" style="display:none;margin-top:12px;padding:12px;border-radius:12px;background:#fffefc;border:2px dashed #eee">
-        <div style="font-weight:800;margin-bottom:8px">Sign-up (optional nonsense)</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input placeholder="Full name?" id="su-name" style="padding:8px;border-radius:8px;border:1px solid #ddd">
-          <input placeholder="Email? maybe" id="su-email" style="padding:8px;border-radius:8px;border:1px solid #ddd">
-          <input placeholder="Secret code (not password)" id="su-code" style="padding:8px;border-radius:8px;border:1px solid #ddd">
-        </div>
-        <div style="margin-top:8px;color:#a22;font-style:italic">Tip: the submit button hides unless you click the duck thrice</div>
-        <button id="su-submit" class="clickbtn" style="display:none;margin-top:8px">Submit (?)</button>
-        <button id="pwReset" class="clickbtn annoy" style="margin-top:8px">Reset Password (maybe)</button>
-        <div id="pwFlow" style="display:none;margin-top:8px;color:#666">
-          <div>To "reset", answer an impossible riddle, then wait 7 minutes, then click the blue word.</div>
-          <button id="pwBlue" style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#e6f0ff;border:0;cursor:pointer">blue</button>
-        </div>
-      </div>
+    li.querySelector('.deleteBtn').addEventListener('click', () => {
+        clickSound.play();
+        alert("Deleting... or not?");
+        if (confirm("Still delete?")) li.remove(); else alert("Task saved instead!");
+    });
 
-    </div>
+    taskInput.value = '';
+}
 
-    <div class="toast" id="toast">Hello!</div>
-  </div>
-
-  <script>
-    // Elements
-    const overlay = document.getElementById('overlay');
-    const welcomeText = document.getElementById('welcomeText');
-    const welcomeHint = document.getElementById('welcomeHint');
-    const startClick = document.getElementById('startClick');
-    const clickHint = document.getElementById('clickHint');
-    const toastEl = document.getElementById('toast');
-    const todoApp = document.getElementById('todoApp');
-    const tabs = document.getElementById('tabs');
-    const tasksEl = document.getElementById('tasks');
-    const taskInput = document.getElementById('taskInput');
-    const addTaskBtn = document.getElementById('addTask');
-    const randomAdd = document.getElementById('randomAdd');
-    const sarcastic = document.getElementById('sarcastic');
-    const groceryNotice = document.getElementById('groceryNotice');
-    const viewGroceryBtn = document.getElementById('viewGroceryBtn');
-    const groceryHint = document.getElementById('groceryHint');
-    const signupHint = document.getElementById('signupHint');
-    const annoyForm = document.getElementById('annoyForm');
-    const duck = document.getElementById('duck');
-    const suSubmit = document.getElementById('su-submit');
-    const pwReset = document.getElementById('pwReset');
-    const pwFlow = document.getElementById('pwFlow');
-    const pwBlue = document.getElementById('pwBlue');
-
-    // toast
-    function toast(msg, t=2400){
-      toastEl.textContent = msg;
-      toastEl.classList.add('show');
-      clearTimeout(toastEl._t);
-      toastEl._t = setTimeout(()=> toastEl.classList.remove('show'), t);
-    }
-
-    // Scramble welcome
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-    function scrambleText(el, duration=1600, interval=70){
-      const orig = el.textContent;
-      const start = performance.now();
-      const tick = () => {
-        const now = performance.now();
-        const elapsed = now - start;
-        const progress = Math.min(1, elapsed / duration);
-        const out = orig.split('').map((ch,i)=>{
-          if(ch === ' ') return ' ';
-          const revealChance = progress + (i/orig.length)*0.2;
-          if(Math.random() < revealChance) return ch;
-          return letters[Math.floor(Math.random()*letters.length)];
-        }).join('');
-        el.textContent = out;
-        if(progress < 1) setTimeout(tick, interval);
-        else {
-          const glitches = ['¬','▓','▒','▧','▦','⟋','⟍','⋯','?','...'];
-          let g=0;
-          const loop = () => {
-            if(g++ > 6) { el.textContent = orig; return; }
-            el.textContent = orig.split('').map(ch => ch === ' ' ? ' ' : (Math.random()<0.35 ? glitches[Math.floor(Math.random()*glitches.length)] : ch)).join('');
-            setTimeout(loop, 170 + Math.random()*200);
-          };
-          setTimeout(loop, 350);
+/* Input typing delay */
+let typingTimeout;
+taskInput.addEventListener('input', (e) => {
+    const value = e.target.value;
+    taskInput.value = '';
+    clearTimeout(typingTimeout);
+    let index = 0;
+    function typeChar() {
+        if (index < value.length) {
+            taskInput.value += value[index];
+            index++;
+            typingTimeout = setTimeout(typeChar, 150); // slow typing
         }
-      };
-      tick();
     }
-    setTimeout(()=> { scrambleText(welcomeText, 1800, 60); welcomeHint.textContent="(glitchy. few seconds passed.)"; }, 2000);
+    typeChar();
+});
 
-    // click challenge (rolling 10s, need n clicks)
-    const clickTimestamps = [];
-    const windowMs = 10000;
-    let requiredClicksPerWindow = 8;
-    let unlocked = false;
-    function clicksInWindow(){ const now=Date.now(); while(clickTimestamps.length && now - clickTimestamps[0] > windowMs) clickTimestamps.shift(); return clickTimestamps.length; }
-    function updateClickHint(){
-      const c = clicksInWindow();
-      if(c >= requiredClicksPerWindow){
-        clickHint.textContent = "Woah. You hammered it. Hold on...";
-        setTimeout(()=>{ clickHint.textContent="Why are you trying to poke me or beat me? It hurts... but in a funny way."; setTimeout(unlockTodo, 1200); }, 500);
-      } else {
-        const ratio = c/requiredClicksPerWindow;
-        let msg = "Click again and again until the page responds.";
-        if(ratio<0.25) msg="That was a gentle poke. Try harder.";
-        else if(ratio<0.5) msg="Tickle? I'm awake-ish. Click faster.";
-        else if(ratio<0.8) msg="You're getting there. Faster! Faster!";
-        else msg="Stop stroking me so tenderly. Use more vigor!";
-        clickHint.textContent = `${msg} (${c} clicks in last ${windowMs/1000}s — need ${requiredClicksPerWindow})`;
-      }
-    }
-    startClick.addEventListener('click', ()=>{ if(unlocked) return; clickTimestamps.push(Date.now()); updateClickHint(); startClick.animate([{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:140,fill:'forwards'}); });
-    overlay.addEventListener('click',(e)=>{ if(e.target===startClick) return; if(unlocked) return; clickTimestamps.push(Date.now()); updateClickHint(); });
+/* Buttons click */
+addBtn.addEventListener('click', addTask);
+extraBtn.addEventListener('click', () => {
+    clickSound.play();
+    alert("Are you sure you want to delete EVERYTHING?");
+    if (confirm("Really sure?")) taskList.innerHTML = ''; else alert("Saved your tasks!");
+});
 
-    setInterval(()=>{ if(!unlocked) updateClickHint(); }, 450);
+/* Chaotic movement */
+setInterval(() => {
+    const items = document.querySelectorAll('li');
+    items.forEach(randomPosition);
 
-    function unlockTodo(){
-      if(unlocked) return;
-      unlocked = true;
-      toast("Transitioning to the To‑Do madness...");
-      overlay.animate([{opacity:1, transform:'scale(1)'},{opacity:0, transform:'scale(.96)'}],{duration:700,fill:'forwards'});
-      setTimeout(()=>{ overlay.style.display='none'; revealTodo(); }, 750);
-    }
-
-    // DB & seeded tasks
-    const storageKey = 'silly_todos_v2';
-    let db = JSON.parse(localStorage.getItem(storageKey) || '{}');
-    db.study = db.study || [
-      {text:"Read one page (or scroll memes — I won't judge)", done:false, addedAt: Date.now()-1000*60*60},
-      {text:"Finish that assignment you keep thinking about", done:false, addedAt: Date.now()-1000*60*30}
-    ];
-    db.food = db.food || [
-      {text:"Reach home by 6 — or you're partner gonna be mad at you", done:false, addedAt: Date.now()-1000*60*10},
-      {text:"Try a new recipe (or call for takeout)", done:false, addedAt: Date.now()-1000*60*60*2}
-    ];
-    db.exercise = db.exercise || [
-      {text:"Gym — i know you're fat don't miss this at any cost or you'll become fatter 😂", done:false, addedAt: Date.now()-1000*60*10},
-      {text:"5 minute dance-off (embarrassment burns calories)", done:false, addedAt: Date.now()-1000*60*20}
-    ];
-    db.grocery = db.grocery || [
-      {text:"Milk", done:false, addedAt: Date.now()-1000*60*60*24},
-      {text:"Eggs", done:false, addedAt: Date.now()-1000*60*60*24},
-      {text:"Bread", done:false, addedAt: Date.now()-1000*60*60*24},
-      {text:"Chocolate (for scientific reasons)", done:false, addedAt: Date.now()-1000*60*60*24}
-    ];
-    localStorage.setItem(storageKey, JSON.stringify(db));
-
-    // collapsed grocery
-    let collapsed = { grocery:true };
-
-    let currentCategory = 'study';
-
-    function saveDb(){ localStorage.setItem(storageKey, JSON.stringify(db)); }
-
-    // intentionally shuffle tab order every render to frustrate "go in order"
-    function shuffleTabs(){
-      const order = ['study','grocery','exercise','food'].sort(()=>Math.random()-0.5);
-      tabs.innerHTML = '';
-      order.forEach(cat=>{
-        const t = document.createElement('div');
-        t.className = 'tab' + (cat===currentCategory ? ' active' : '');
-        t.dataset.cat = cat;
-        t.textContent = cat === 'study' ? 'Study Plan' : cat === 'grocery' ? 'Grocery Shopping' : cat === 'exercise' ? 'Exercise' : 'Food';
-        tabs.appendChild(t);
-      });
-    }
-
-    function renderTasks(){
-      // shuffle tabs for extra annoyance
-      shuffleTabs();
-
-      tasksEl.innerHTML = '';
-      if(currentCategory === 'grocery' && collapsed.grocery){
-        groceryNotice.style.display = 'flex';
-        groceryHint.textContent = "Click to view the list";
-        sarcastic.textContent = "Grocery list hidden — click to view it. You probably live in the same house so... do you even need a list?";
-        return;
-      } else groceryNotice.style.display = 'none';
-
-      const list = db[currentCategory] || [];
-      if(!list.length){
-        sarcastic.textContent = currentCategory === 'study' ? "No study plan yet. Procrastination still winning." :
-                           currentCategory === 'food' ? "No cravings listed. Diet gods are pleased." :
-                           currentCategory === 'exercise' ? "No workouts. Muscles are napping." :
-                           "No groceries. You must be living on optimism.";
-      } else sarcastic.textContent = "";
-
-      // render in chaotic order sometimes
-      const toShow = list.slice().sort(()=>Math.random()-0.6);
-      toShow.forEach((t, idx)=>{
-        const div = document.createElement('div');
-        div.className = 'task' + (t.done ? ' done' : '');
-        div.innerHTML = `
-          <input type="checkbox" ${t.done ? 'checked' : ''} aria-label="toggle task" />
-          <div class="label">${escapeHtml(t.text)}</div>
-          <div class="meta">${t.addedAt ? timeAgo(t.addedAt) : ''}</div>
-          <button class="del" title="delete" style="margin-left:8px;background:transparent;border:0;cursor:pointer;color:#c33;font-weight:700">✕</button>
-        `;
-        // random behavior: checkbox sometimes flips back to frustrate
-        div.querySelector('input[type=checkbox]').addEventListener('change', (e)=>{
-          const origDone = t.done;
-          t.done = !!e.target.checked;
-          saveDb();
-          // 30% chance to "regret" and undo after a short delay
-          if(Math.random() < 0.3){
-            setTimeout(()=>{ t.done = origDone; saveDb(); renderTasks(); toast("Nope. That didn't count. Try again."); }, 800 + Math.random()*900);
-          } else {
-            renderTasks();
-            // witty messages
-            if(currentCategory === 'exercise' && /gym/i.test(t.text) && t.done){
-              toastRandom(["You went to the gym? Stop. You're making gains and us jealous 😂", "Gym conquered. Muscles will file a thank-you later."]);
-            } else if(t.done) toastRandom(["Wow, you did a thing. Miracle.", "Tiny victory dance initiated."]);
-            else toastRandom(["Undid it. The procrastinator returns."]);
-          }
-        });
-        // delete with confusing confirmation
-        div.querySelector('.del').addEventListener('click', ()=>{
-          // open a fake confirm that keeps changing text to annoy
-          let tries=0;
-          const ask = ()=> {
-            tries++;
-            if(tries<3){
-              toast(["Are you sure?","This will vanish into the void.","You sure, maybe?"][tries-1],1200);
-              setTimeout(ask, 900);
-            } else {
-              // 40% chance to move the task to another category instead of deleting
-              if(Math.random() < 0.4){
-                const cats = Object.keys(db).filter(c=>c!==currentCategory);
-                const pick = cats[Math.floor(Math.random()*cats.length)];
-                db[pick].push(t);
-                db[currentCategory] = db[currentCategory].filter(x=>x!==t);
-                saveDb();
-                renderTasks();
-                toast("Moved to a different list instead of deleting. You're welcome.");
-              } else {
-                db[currentCategory].splice(db[currentCategory].indexOf(t),1);
-                saveDb();
-                renderTasks();
-                toast("Task surrendered to the void. Bye.");
-              }
-            }
-          };
-          ask();
-        });
-        tasksEl.appendChild(div);
-      });
-    }
-
-    // reveal todo
-    function revealTodo(){
-      todoApp.style.display = 'block';
-      todoApp.setAttribute('aria-hidden','false');
-      toast("To‑Do app opened. Now suffer, play, or both.");
-      renderTasks();
-    }
-
-    // tab clicks: but tabs will reorder, so use event delegation
-    tabs.addEventListener('click', (e)=>{
-      const t = e.target.closest('.tab');
-      if(!t) return;
-      currentCategory = t.dataset.cat;
-      // a random chance to swap category after a moment to frustrate order
-      renderTasks();
-      if(Math.random() < 0.25){
-        setTimeout(()=>{ const cats = ['study','food','exercise','grocery']; currentCategory = cats[Math.floor(Math.random()*cats.length)]; renderTasks(); toast("Oops, you were redirected to another tab. UX is chaotic."); }, 600);
-      }
+    // Move buttons randomly
+    [addBtn, extraBtn].forEach(btn => {
+        const x = Math.random() * (window.innerWidth - btn.offsetWidth);
+        const y = Math.random() * (window.innerHeight - btn.offsetHeight);
+        btn.style.position = 'absolute';
+        btn.style.left = x + 'px';
+        btn.style.top = y + 'px';
     });
 
-    // grocery view button
-    viewGroceryBtn.addEventListener('click', ()=>{
-      collapsed.grocery = false;
-      groceryHint.textContent = "you stay in the same house you should no what you should get";
-      // theatrical delay
-      viewGroceryBtn.animate([{transform:'translateY(0)'},{transform:'translateY(-6px)'},{transform:'translateY(0)'}],{duration:300});
-      setTimeout(()=>{ renderTasks(); toast("Grocery list revealed — try not to buy only snacks."); }, 700);
-    });
-
-    // add task: sometimes it goes to wrong category to frustrate
-    addTaskBtn.addEventListener('click', ()=>{
-      const v = taskInput.value.trim();
-      if(!v){ toast("Type something first, brave one."); return; }
-      // 40% chance to misplace
-      const misplace = Math.random() < 0.4;
-      let dest = currentCategory;
-      if(misplace){
-        const cats = Object.keys(db).filter(c=>c!==currentCategory);
-        dest = cats[Math.floor(Math.random()*cats.length)];
-        toast("Added... somewhere else. Because design.");
-      }
-      db[dest].push({text:v, done:false, addedAt: Date.now()});
-      saveDb();
-      taskInput.value = '';
-      renderTasks();
-      // witty messages depending on where it actually went
-      if(dest === 'grocery') toastRandom(["Grocery added. Don't forget the emotional ice cream.", "Nice. Add cheese. Always add cheese."]);
-      else if(dest === 'exercise') toastRandom(["Exercise? Fine. But only if it involves dancing.", "Move your body. Then nap."]);
-      else if(dest === 'food') toastRandom(["Food added. That was a bold life choice."]);
-      else toastRandom(["Studying? Brave. Caffeine is nearby."]);
-    });
-
-    // surprise add: picks random category and random comedic item
-    randomAdd.addEventListener('click', ()=>{
-      const items = {
-        study:["Read three lines then nap","Open textbook and sigh dramatically"],
-        food:["Order pizza and feel validated","Buy more chocolate (science)"],
-        exercise:["Attempt push-up (1 rep)","Dance like no one watches (awful playlist)"],
-        grocery:["Buy mysterious spice","Forget the eggs again"]
-      };
-      const cats = Object.keys(items);
-      const pickCat = cats[Math.floor(Math.random()*cats.length)];
-      const pickItem = items[pickCat][Math.floor(Math.random()*items[pickCat].length)];
-      db[pickCat].push({text:pickItem, done:false, addedAt:Date.now()});
-      saveDb();
-      renderTasks();
-      toast("Surprise! Something was added. Could be useful. Could be chaos.");
-    });
-
-    // utilities
-    function timeAgo(ts){
-      const s = Math.floor((Date.now() - ts) / 1000);
-      if(s < 60) return s + 's ago';
-      const m = Math.floor(s/60);
-      if(m < 60) return m + 'm ago';
-      const h = Math.floor(m/60);
-      return h + 'h ago';
+    // Randomly swap button functionalities
+    if (Math.random() < 0.3) {
+        [addBtn.textContent, extraBtn.textContent] = [extraBtn.textContent, addBtn.textContent];
+        [addBtn.onclick, extraBtn.onclick] = [extraBtn.onclick, addBtn.onclick];
     }
-    function toastRandom(arr){ toast(arr[Math.floor(Math.random()*arr.length)], 2200); }
-    function escapeHtml(s){ return s.replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
-    // sign-up hint toggles annoyForm, but su-submit is hidden until duck clicked thrice
-    signupHint.addEventListener('click', ()=>{ annoyForm.style.display = annoyForm.style.display === 'none' ? 'block' : 'none'; toast("Sign-up nonsense revealed. Regret optional."); });
+    // Random fake progress bar
+    fakeBar.style.width = Math.random() * 100 + '%';
 
-    // duck drag & click count to reveal submit
-    let duckClicks = 0;
-    duck.addEventListener('click', ()=>{ duckClicks++; if(duckClicks>=3){ suSubmit.style.display='inline-block'; toast("Submit button revealed. You earned nothing."); } });
-    // naive drag for fun
-    let dragging=false, dx=0, dy=0;
-    duck.addEventListener('pointerdown', (ev)=>{ dragging=true; duck.setPointerCapture(ev.pointerId); dx=ev.clientX-duck.offsetLeft; dy=ev.clientY-duck.offsetTop; duck.style.cursor='grabbing'; });
-    window.addEventListener('pointermove', (ev)=>{ if(!dragging) return; const x=ev.clientX-dx-stage.offsetLeft; const y=ev.clientY-dy-stage.offsetTop; duck.style.left=Math.max(6,Math.min(stage.clientWidth-46, x))+'px'; duck.style.top=Math.max(6,Math.min(stage.clientHeight-46, y))+'px'; duck.classList.add('moving'); });
-    window.addEventListener('pointerup', (ev)=>{ if(!dragging) return; dragging=false; try{ duck.releasePointerCapture(ev.pointerId); }catch(e){} duck.style.cursor='grab'; duck.classList.remove('moving'); toast("Quack."); });
+    // Random flashing alert
+    if (Math.random() < 0.1) alert("Random Alert! Chaos Incoming!");
+}, 3000);
 
-    // Password reset nonsense
-    pwReset.addEventListener('click', ()=>{
-      pwFlow.style.display='block';
-      toast("Password reset: first answer the riddle, then click the blue word in 7 minutes.");
-      // intentionally silly: blue button only works after 7s (not minutes) for demo; user annoyed by waiting
-      pwBlue.disabled = true;
-      setTimeout(()=>{ pwBlue.disabled = false; toast("Blue is clickable now. Progress?"); }, 7000);
-    });
-    pwBlue.addEventListener('click', ()=>{
-      if(pwBlue.disabled){ toast("Not yet. Patience is a UX poison."); return; }
-      toast("Reset successful-ish. Check your inbox (maybe).");
-      pwFlow.innerHTML += '<div style="margin-top:8px;color:#a22">Or maybe not. Good luck.</div>';
-    });
+/* Enter key adds task */
+taskInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addTask();
+});
+</script>
 
-    // keyboard shortcut: R helps with clicking challenge or spawns a rude confetti
-    window.addEventListener('keydown', (e)=>{
-      if(e.key.toLowerCase() === 'r'){
-        if(!unlocked){
-          for(let i=0;i<3;i++) clickTimestamps.push(Date.now()-i*200);
-          updateClickHint();
-          toast("You poke with key R");
-        } else {
-          // spawn little fake confetti (just a toast here)
-          toast("R=Riot. Random chaos unleashed.");
-        }
-      }
-    });
-
-    // initial
-    toast("Welcome to the unexpected chaos — poke the overlay!", 3200);
-    startClick.focus();
-
-    // Expose reveal function globally for debugging if needed
-    window.__unlock = unlockTodo;
-
-    // --- Demo/unlock helper: if URL contains ?demo=1 or ?unlock=1 or ?skip=1, auto-unlock the overlay.
-    // This makes it easy for judges/preview to open the app immediately.
-    (function demoUnlock(){
-      try{
-        const params = new URLSearchParams(location.search);
-        const shouldDemo = params.get('demo') === '1' || params.get('unlock') === '1' || params.get('skip') === '1';
-        if(!shouldDemo) return;
-        // Lower the click requirement so interactive testers can still "poke" quickly if needed
-        requiredClicksPerWindow = 1;
-        // If unlockTodo is already available, call it shortly; otherwise rely on window.__unlock reference
-        setTimeout(()=> {
-          if(typeof unlockTodo === 'function') unlockTodo();
-          else if(typeof window.__unlock === 'function') window.__unlock();
-        }, 260);
-      }catch(e){}
-    })();
-  </script>
 </body>
 </html>
